@@ -7,5 +7,5 @@ public interface IMetroCardService {
 
     public MetroCard create(String metrocardId, Integer balance);
 
-    public boolean evaluateDiscountEligibility(String metrocardId);
+    public boolean evaluateDiscountEligibility(MetroCard metroCard);
 }

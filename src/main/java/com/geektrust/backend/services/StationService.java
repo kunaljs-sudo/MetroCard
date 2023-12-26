@@ -49,8 +49,7 @@ public class StationService implements IStationService {
         Integer ticketamount = getTicketPrice(userType);
 
 
-        boolean discoundApplicable =
-                metroCardService.evaluateDiscountEligibility(metroCard.getId());
+        boolean discoundApplicable = metroCardService.evaluateDiscountEligibility(metroCard);
         Integer discountGivenOnTicket = discoundApplicable ? ticketamount / 2 : 0;
         Integer moneyCollectedOnTicket = metroCardService.payMoney(metroCard.getId(), ticketamount);
 
@@ -169,15 +168,13 @@ public class StationService implements IStationService {
         }
         String res = "";
         if (stationRepository.existsById("CENTRAL")) {
-            res += detailsOfStation(stationRepository.findByName("CENTRAL").get());
+            res += detailsOfStation(getStationByName("CENTRAL"));
         }
         if (stationRepository.existsById("AIRPORT")) {
-            res += detailsOfStation(stationRepository.findByName("AIRPORT").get());
+            res += detailsOfStation(getStationByName("AIRPORT"));
         }
 
         return res;
-
-
     }
 
 }

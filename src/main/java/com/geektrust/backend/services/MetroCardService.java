@@ -16,28 +16,28 @@ public class MetroCardService implements IMetroCardService {
     @Override
     public Integer payMoney(String metrocardId, Integer amount) {
         MetroCard metroCard = getMetroCard(metrocardId);
-        Double toPay;
-
-        boolean discountApplicable = evaluateDiscountEligibility(metrocardId);
-
+        boolean discountApplicable = evaluateDiscountEligibility(metroCard);
+        Integer toPay;
         if (discountApplicable) {
             amount = amount / 2;
         }
 
+        Double trxnChrgPercentage = 0.02;
+
         if (metroCard.getBalance() < amount) {
             Double amountDiff = (double) (amount - metroCard.getBalance());
-            Double trxnChrg = 0.02 * amountDiff;
-            toPay = amount + trxnChrg;
+            Double trxnChrg = trxnChrgPercentage * amountDiff;
+            toPay = amount + (int) Math.ceil(trxnChrg);
             metroCard.setBalance(0);
         } else {
-            toPay = (double) amount;
+            toPay = amount;
             metroCard.setBalance(metroCard.getBalance() - amount);
         }
         // If we are paying means we are making a journey
         metroCard.incrementTotalJourney();
         saveToMetroCardRepository(metroCard);
 
-        return (int) Math.ceil(toPay);
+        return toPay;
     }
 
     @Override
@@ -47,16 +47,11 @@ public class MetroCardService implements IMetroCardService {
     }
 
     @Override
-    public boolean evaluateDiscountEligibility(String metrocardId) {
-        Optional<MetroCard> oMetroCard = metroCardRepository.findById(metrocardId);
-        if (oMetroCard.isEmpty()) {
-            throw new NoMetroCardFoundException(
-                    "Invalid metroCardName: " + metrocardId + "checking for discount eligibilty");
-        }
+    public boolean evaluateDiscountEligibility(MetroCard metroCard) {
 
-        MetroCard metroCard = oMetroCard.get();
         Integer totalJourney = metroCard.getTotalJourney();
-        if (totalJourney != 0 && totalJourney % 2 == 1) {
+        // odd
+        if ((totalJourney.intValue() % 2) == 1) {
             return true;
         }
         return false;
