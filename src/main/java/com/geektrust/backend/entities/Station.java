@@ -74,7 +74,7 @@ public class Station {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((stationName == null) ? 0 : stationName.hashCode());
+        result = prime * result + ((getStationName() == null) ? 0 : getStationName().hashCode());
         return result;
     }
 
@@ -87,10 +87,10 @@ public class Station {
         if (getClass() != obj.getClass())
             return false;
         Station other = (Station) obj;
-        if (stationName == null) {
-            if (other.stationName != null)
+        if (this.getStationName() == null) {
+            if (other.getClass() != null)
                 return false;
-        } else if (!stationName.equals(other.stationName))
+        } else if (!this.getStationName().equals(other.getStationName()))
             return false;
         return true;
     }

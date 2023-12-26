@@ -77,10 +77,10 @@ public class MetroCard extends BaseEntity {
         if (getClass() != obj.getClass())
             return false;
         MetroCard other = (MetroCard) obj;
-        if (id == null) {
-            if (other.id != null)
+        if (this.getId() == null) {
+            if (other.getId() != null)
                 return false;
-        } else if (!id.equals(other.id))
+        } else if (!this.getId().equals(other.getId()))
             return false;
         return true;
     }
