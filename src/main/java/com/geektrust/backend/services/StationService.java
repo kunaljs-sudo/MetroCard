@@ -51,15 +51,15 @@ public class StationService implements IStationService {
         } else {
             station = oStation.get();
         }
-
+        Integer adultTicketPrice = 200, seniorCitizenTicketPrice = 100, kidTicketPrice = 50;
         Integer ticketamount = 0;
 
         if (userType == UserType.ADULT) {
-            ticketamount = 200;
+            ticketamount = adultTicketPrice;
         } else if (userType == UserType.SENIOR_CITIZEN) {
-            ticketamount = 100;
+            ticketamount = seniorCitizenTicketPrice;
         } else if (userType == UserType.KID) {
-            ticketamount = 50;
+            ticketamount = kidTicketPrice;
         } else {
             throw new UserTypeNotFoundException(
                     "While checkIn userType provided is Invalid" + userType);
@@ -79,7 +79,7 @@ public class StationService implements IStationService {
 
     }
 
-    private String getSortedUserTypes(Station station) {
+    private final String getSortedUserTypes(Station station) {
         List<UserType> userTypes = station.getUserTypes();
         Map<UserType, Integer> frequencyMap = new HashMap<>();
         for (UserType user : userTypes) {
@@ -111,7 +111,7 @@ public class StationService implements IStationService {
         return res;
     }
 
-    private String detailsOfStation(Station station) {
+    private final String detailsOfStation(Station station) {
         String res = "";
         res += "TOTAL_COLLECTION " + station.getStationName() + " " + station.getTotal_collection()
                 + " " + station.getTotal_discount_given() + "\n";
