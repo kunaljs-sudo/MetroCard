@@ -15,13 +15,7 @@ public class MetroCardService implements IMetroCardService {
 
     @Override
     public Integer payMoney(String metrocardId, Integer amount) {
-        Optional<MetroCard> oMetroCard = metroCardRepository.findById(metrocardId);
-        if (oMetroCard.isEmpty()) {
-            throw new NoMetroCardFoundException(
-                    "While paying Card not found with cardId: " + metrocardId);
-        }
-
-        MetroCard metroCard = oMetroCard.get();
+        MetroCard metroCard = getMetroCard(metrocardId);
         Double toPay;
 
         boolean discountApplicable = evaluateDiscountEligibility(metrocardId);
@@ -39,6 +33,10 @@ public class MetroCardService implements IMetroCardService {
             toPay = (double) amount;
             metroCard.setBalance(metroCard.getBalance() - amount);
         }
+        // If we are paying means we are making a journey
+        metroCard.incrementTotalJourney();
+        saveToMetroCardRepository(metroCard);
+
         return (int) Math.ceil(toPay);
     }
 
@@ -62,6 +60,20 @@ public class MetroCardService implements IMetroCardService {
             return true;
         }
         return false;
+    }
+
+    private MetroCard getMetroCard(String metrocardId) {
+        Optional<MetroCard> oMetroCard = metroCardRepository.findById(metrocardId);
+        if (oMetroCard.isEmpty()) {
+            throw new NoMetroCardFoundException(
+                    "While paying Card not found with cardId: " + metrocardId);
+        }
+
+        return oMetroCard.get();
+    }
+
+    private MetroCard saveToMetroCardRepository(MetroCard metroCard) {
+        return metroCardRepository.save(metroCard);
     }
 
 }

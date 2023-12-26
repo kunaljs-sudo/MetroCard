@@ -14,7 +14,8 @@ public class PrintSummaryCommand implements ICommand {
 
     @Override
     public void execute(List<String> tokens) {
-        stationService.printSummary();
+        String res = stationService.getSummary();
+        System.out.println(res);
     }
 
 }

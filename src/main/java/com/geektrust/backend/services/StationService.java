@@ -37,33 +37,18 @@ public class StationService implements IStationService {
     }
 
     @Override
-    public void checkIn(String metroCardId, UserType userType, String stationName) {
-        Optional<MetroCard> oMetroCard = metroCardRepository.findById(metroCardId);
-        if (oMetroCard.isEmpty()) {
-            throw new NoMetroCardFoundException(
-                    "To checkIn the given metroCard is invalid: " + metroCardId);
-        }
-        MetroCard metroCard = oMetroCard.get();
-        Optional<Station> oStation = stationRepository.findByName(stationName);
-        Station station;
-        if (oStation.isEmpty()) {
-            station = create(stationName);
-        } else {
-            station = oStation.get();
-        }
-        Integer adultTicketPrice = 200, seniorCitizenTicketPrice = 100, kidTicketPrice = 50;
-        Integer ticketamount = 0;
+    public void checkIn(List<String> args) {
 
-        if (userType == UserType.ADULT) {
-            ticketamount = adultTicketPrice;
-        } else if (userType == UserType.SENIOR_CITIZEN) {
-            ticketamount = seniorCitizenTicketPrice;
-        } else if (userType == UserType.KID) {
-            ticketamount = kidTicketPrice;
-        } else {
-            throw new UserTypeNotFoundException(
-                    "While checkIn userType provided is Invalid" + userType);
-        }
+        String metroCardId = args.get(0);
+        UserType userType = UserType.valueOf(args.get(1));
+        String stationName = args.get(2);
+
+        MetroCard metroCard = getMetroCardByID(metroCardId);
+        Station station = getStationByName(stationName);
+
+        Integer ticketamount = getTicketPrice(userType);
+
+
         boolean discoundApplicable =
                 metroCardService.evaluateDiscountEligibility(metroCard.getId());
         Integer discountGivenOnTicket = discoundApplicable ? ticketamount / 2 : 0;
@@ -72,23 +57,66 @@ public class StationService implements IStationService {
         station.addToCollection(moneyCollectedOnTicket);
         station.addTotal_discount_given(discountGivenOnTicket);
         station.addUserType(userType);
-        stationRepository.save(station);
 
-        metroCard.incrementTotalJourney();
-        metroCardRepository.save(metroCard);
+        saveToStationRepository(station);
 
     }
 
-    private final String getSortedUserTypes(Station station) {
-        List<UserType> userTypes = station.getUserTypes();
+    private Station saveToStationRepository(Station station) {
+        return stationRepository.save(station);
+    }
+
+    private MetroCard getMetroCardByID(String metroCardId) {
+        Optional<MetroCard> oMetroCard = metroCardRepository.findById(metroCardId);
+        if (oMetroCard.isEmpty()) {
+            throw new NoMetroCardFoundException(
+                    "To checkIn the given metroCard is invalid: " + metroCardId);
+        }
+        MetroCard metroCard = oMetroCard.get();
+        return metroCard;
+    }
+
+    private Station getStationByName(String stationName) {
+        Optional<Station> oStation = stationRepository.findByName(stationName);
+        Station station;
+        if (oStation.isEmpty()) {
+            station = create(stationName);
+        } else {
+            station = oStation.get();
+        }
+        return station;
+    }
+
+    private Integer getTicketPrice(UserType userType) {
+        if (userType == UserType.ADULT) {
+            return 200;
+        } else if (userType == UserType.SENIOR_CITIZEN) {
+            return 100;
+        } else if (userType == UserType.KID) {
+            return 50;
+        } else {
+            throw new UserTypeNotFoundException(
+                    "While checkIn userType provided is Invalid" + userType);
+        }
+    }
+
+    private Map<UserType, Integer> getFrequencyMap(List<UserType> userTypes) {
         Map<UserType, Integer> frequencyMap = new HashMap<>();
         for (UserType user : userTypes) {
             frequencyMap.put(user, frequencyMap.getOrDefault(user, 0) + 1);
         }
+        return frequencyMap;
+    }
+
+    private List<UserType> getRequiredUserTypes() {
         List<UserType> requiredUserType = new ArrayList<>();
         requiredUserType.add(UserType.ADULT);
         requiredUserType.add(UserType.KID);
         requiredUserType.add(UserType.SENIOR_CITIZEN);
+        return requiredUserType;
+    }
+
+    private Comparator<UserType> getCustomComparator(Map<UserType, Integer> frequencyMap) {
         Comparator<UserType> comparator = new Comparator<UserType>() {
             public int compare(UserType ut1, UserType ut2) {
                 int freqComp = Integer.compare(frequencyMap.getOrDefault(ut2, 0),
@@ -99,8 +127,18 @@ public class StationService implements IStationService {
                 return String.valueOf(ut1).compareTo(String.valueOf(ut2));
             }
         };
+        return comparator;
+    }
 
+    private final String getSortedUserTypes(Station station) {
+
+        List<UserType> userTypes = station.getUserTypes();
+        Map<UserType, Integer> frequencyMap = getFrequencyMap(userTypes);
+
+        Comparator<UserType> comparator = getCustomComparator(frequencyMap);
+        List<UserType> requiredUserType = getRequiredUserTypes();
         Collections.sort(requiredUserType, comparator);
+
         String res = "";
         for (UserType userType : requiredUserType) {
             if (frequencyMap.containsKey(userType)) {
@@ -123,7 +161,7 @@ public class StationService implements IStationService {
     }
 
     @Override
-    public void printSummary() {
+    public String getSummary() {
 
         if (stationRepository.count() == 0) {
             throw new StationNotFoundException(
@@ -137,7 +175,7 @@ public class StationService implements IStationService {
             res += detailsOfStation(stationRepository.findByName("AIRPORT").get());
         }
 
-        System.out.println(res);
+        return res;
 
 
     }

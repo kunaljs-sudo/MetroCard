@@ -67,12 +67,11 @@ public class StationServiceTest {
         when(metroCardRepository.findById(anyString())).thenReturn(Optional.of(metroCard));
         when(stationRepository.findByName(anyString())).thenReturn(Optional.of(station));
         when(stationRepository.save(any(Station.class))).thenReturn(station);
-        when(metroCardRepository.save(any(MetroCard.class))).thenReturn(metroCard);
+        
 
-        stationService.checkIn("MC1", UserType.ADULT, "CHENNAI");
+        stationService.checkIn(List.of("MC1", String.valueOf(UserType.ADULT), "CHENNAI"));
 
         verify(metroCardRepository, times(1)).findById(anyString());
-        verify(metroCardRepository, times(1)).save(any(MetroCard.class));
         verify(stationRepository, times(1)).findByName(anyString());
         verify(stationRepository, times(0)).count();
 
@@ -95,8 +94,8 @@ public class StationServiceTest {
 
 
 
-        Assertions.assertThrows(UserTypeNotFoundException.class,
-                () -> stationService.checkIn("MC1", UserType.valueOf("TEST"), "CHENNAI"));
+        Assertions.assertThrows(UserTypeNotFoundException.class, () -> stationService
+                .checkIn(List.of("MC1", String.valueOf(UserType.TEST), "CHENNAI")));
 
         verify(metroCardRepository, times(1)).findById(anyString());
         verify(metroCardRepository, times(0)).save(any(MetroCard.class));
@@ -106,13 +105,12 @@ public class StationServiceTest {
     }
 
     @Test
-    @DisplayName("printSummaryTest Throws Error")
-    public void printSummaryTestThrowsError() {
+    @DisplayName("getSummaryTest Throws Error")
+    public void getSummaryTestThrowsError() {
 
         when(stationRepository.count()).thenReturn((long) 0);
 
-        Assertions.assertThrows(StationNotFoundException.class,
-                () -> stationService.printSummary());
+        Assertions.assertThrows(StationNotFoundException.class, () -> stationService.getSummary());
 
         verify(stationRepository, times(1)).count();
 

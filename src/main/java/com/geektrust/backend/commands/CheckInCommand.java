@@ -18,7 +18,7 @@ public class CheckInCommand implements ICommand {
         UserType userType = UserType.valueOf(tokens.get(2));
         String stationName = tokens.get(3);
 
-        stationService.checkIn(metroCardName, userType, stationName);
+        stationService.checkIn(List.of(metroCardName, String.valueOf(userType), stationName));
     }
 
 }
