@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'jacoco'
-    id 'application'
+    // id 'application'
 }
 
 group = 'com.geektrust'
@@ -23,9 +23,9 @@ jacocoTestReport { //Please do not change this
     }
 }
 
-application {
-    mainClassName = 'com.geektrust.backend.App'
-}
+// application {
+//     mainClassName = 'com.geektrust.backend.App'
+// }
 
 jar {
     archiveBaseName = 'geektrust' //Please do not change this final artifact name
