@@ -21,14 +21,14 @@ public class GetStationSummaryService implements IGetStationSummaryService {
         this.stationService = stationService;
     }
 
-    private String detailsOfStation(Station station) {
+    private final String detailsOfStation(Station station) {
         return String.format("TOTAL_COLLECTION %s %d %d%n", station.getStationName(),
                 station.getTotalCollection(), station.getTotalDiscountGiven())
                 + "PASSENGER_TYPE_SUMMARY\n"
                 + userStatisticsService.getUserStatistics(station.getUserTypes());
     }
 
-    private Station getStationByName(String stationName) {
+    private final Station getStationByName(String stationName) {
         Optional<Station> oStation = stationRepository.findByName(stationName);
         Station station;
         if (oStation.isEmpty()) {

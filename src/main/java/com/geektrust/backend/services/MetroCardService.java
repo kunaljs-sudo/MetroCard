@@ -7,7 +7,7 @@ import com.geektrust.backend.repositories.IMetroCardRepository;
 
 public class MetroCardService implements IMetroCardService {
 
-    private IMetroCardRepository metroCardRepository;
+    private final IMetroCardRepository metroCardRepository;
     private Double trxnChrgPercentage = 0.02;
 
     public MetroCardService(IMetroCardRepository metroCardRepository) {
@@ -77,6 +77,14 @@ public class MetroCardService implements IMetroCardService {
 
     private MetroCard saveToMetroCardRepository(MetroCard metroCard) {
         return metroCardRepository.save(metroCard);
+    }
+
+    public Double getTrxnChrgPercentage() {
+        return trxnChrgPercentage;
+    }
+
+    public void setTrxnChrgPercentage(Double trxnChrgPercentage) {
+        this.trxnChrgPercentage = trxnChrgPercentage;
     }
 
 }

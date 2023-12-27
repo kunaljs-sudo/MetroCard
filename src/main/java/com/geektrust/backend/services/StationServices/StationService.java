@@ -2,6 +2,7 @@ package com.geektrust.backend.services.StationServices;
 
 import java.util.List;
 import java.util.Optional;
+import com.geektrust.backend.constants.MagicNumbers;
 import com.geektrust.backend.entities.MetroCard;
 import com.geektrust.backend.entities.Station;
 import com.geektrust.backend.entities.UserType;
@@ -13,13 +14,9 @@ import com.geektrust.backend.services.IMetroCardService;
 
 public class StationService implements IStationService {
 
-    private IMetroCardRepository metroCardRepository;
-    private IStationRepository stationRepository;
-    private IMetroCardService metroCardService;
-
-    private static final int METRO_CARD_NAME_INDEX = 0;
-    private static final int USER_TYPE_INDEX = 1;
-    private static final int STATION_NAME_INDEX = 2;
+    private final IMetroCardRepository metroCardRepository;
+    private final IStationRepository stationRepository;
+    private final IMetroCardService metroCardService;
 
     public StationService(IMetroCardRepository metroCardRepository,
             IStationRepository stationRepository, IMetroCardService metroCardService) {
@@ -38,9 +35,9 @@ public class StationService implements IStationService {
     @Override
     public void checkIn(List<String> args) {
         // Extract information from the input arguments
-        String metroCardId = args.get(METRO_CARD_NAME_INDEX);
+        String metroCardId = args.get(MagicNumbers.ZERO);
         UserType userType = getUserType(args);
-        String stationName = args.get(STATION_NAME_INDEX);
+        String stationName = args.get(MagicNumbers.TWO);
 
         // Retrieve MetroCard and Station objects
         MetroCard metroCard = getMetroCardByID(metroCardId);
@@ -62,20 +59,20 @@ public class StationService implements IStationService {
     }
 
     // Helper method to convert string to UserType with error handling
-    private UserType getUserType(List<String> args) {
+    private final UserType getUserType(List<String> args) {
         try {
-            return UserType.valueOf(args.get(USER_TYPE_INDEX));
+            return UserType.valueOf(args.get(MagicNumbers.ONE));
         } catch (IllegalArgumentException e) {
             // Handle the case where the string cannot be converted to a valid UserType
-            throw new IllegalArgumentException("Invalid UserType: " + args.get(USER_TYPE_INDEX));
+            throw new IllegalArgumentException("Invalid UserType: " + args.get(MagicNumbers.ONE));
         }
     }
 
-    private Station saveToStationRepository(Station station) {
+    private final Station saveToStationRepository(Station station) {
         return stationRepository.save(station);
     }
 
-    private MetroCard getMetroCardByID(String metroCardId) {
+    private final MetroCard getMetroCardByID(String metroCardId) {
         Optional<MetroCard> oMetroCard = metroCardRepository.findById(metroCardId);
         if (oMetroCard.isEmpty()) {
             throw new NoMetroCardFoundException(
@@ -85,7 +82,7 @@ public class StationService implements IStationService {
         return metroCard;
     }
 
-    private Station getStationByName(String stationName) {
+    private final Station getStationByName(String stationName) {
         Optional<Station> oStation = stationRepository.findByName(stationName);
         Station station;
         if (oStation.isEmpty()) {
@@ -96,14 +93,14 @@ public class StationService implements IStationService {
         return station;
     }
 
-    private Integer getTicketPrice(UserType userType) {
+    private final Integer getTicketPrice(UserType userType) {
         switch (userType) {
             case ADULT:
-                return 200;
+                return userType.getVal();
             case SENIOR_CITIZEN:
-                return 100;
+                return userType.getVal();
             case KID:
-                return 50;
+                return userType.getVal();
             default:
                 throw new UserTypeNotFoundException("Invalid UserType during checkIn: " + userType);
         }
