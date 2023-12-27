@@ -23,7 +23,8 @@ public class StationRepository implements IStationRepository {
 
     @Override
     public List<Station> findAll() {
-        return new ArrayList<>(stationMap.values());
+        List<Station> allStations = new ArrayList<>(stationMap.values());
+        return allStations;
     }
 
     @Override

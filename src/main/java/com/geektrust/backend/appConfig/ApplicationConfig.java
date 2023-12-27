@@ -10,8 +10,10 @@ import com.geektrust.backend.repositories.MetroCardRepository;
 import com.geektrust.backend.repositories.StationRepository;
 import com.geektrust.backend.services.IMetroCardService;
 import com.geektrust.backend.services.IStationService;
+import com.geektrust.backend.services.IUserStatisticsService;
 import com.geektrust.backend.services.MetroCardService;
 import com.geektrust.backend.services.StationService;
+import com.geektrust.backend.services.UserStatisticsService;
 
 public class ApplicationConfig {
 
@@ -19,8 +21,9 @@ public class ApplicationConfig {
     private final IStationRepository stationRepository = new StationRepository();
 
     private final IMetroCardService metroCardService = new MetroCardService(metroCardRepository);
-    private final IStationService stationService =
-            new StationService(metroCardRepository, stationRepository, metroCardService);
+    private final IUserStatisticsService userStatisticsService = new UserStatisticsService();
+    private final IStationService stationService = new StationService(metroCardRepository,
+            stationRepository, metroCardService, userStatisticsService);
 
     private final BalanceCommand balanceCommand = new BalanceCommand(metroCardService);
     private final CheckInCommand checkInCommand = new CheckInCommand(stationService);

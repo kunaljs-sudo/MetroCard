@@ -1,12 +1,9 @@
 package com.geektrust.backend.services;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import com.geektrust.backend.entities.MetroCard;
 import com.geektrust.backend.entities.Station;
 import com.geektrust.backend.entities.UserType;
@@ -21,12 +18,15 @@ public class StationService implements IStationService {
     private IMetroCardRepository metroCardRepository;
     private IStationRepository stationRepository;
     private IMetroCardService metroCardService;
+    private IUserStatisticsService userStatisticsService;
 
     public StationService(IMetroCardRepository metroCardRepository,
-            IStationRepository stationRepository, IMetroCardService metroCardService) {
+            IStationRepository stationRepository, IMetroCardService metroCardService,
+            IUserStatisticsService userStatisticsService) {
         this.metroCardRepository = metroCardRepository;
         this.stationRepository = stationRepository;
         this.metroCardService = metroCardService;
+        this.userStatisticsService = userStatisticsService;
     }
 
     @Override
@@ -99,82 +99,30 @@ public class StationService implements IStationService {
         }
     }
 
-    private Map<UserType, Integer> getFrequencyMap(List<UserType> userTypes) {
-        Map<UserType, Integer> frequencyMap = new HashMap<>();
-        for (UserType user : userTypes) {
-            frequencyMap.put(user, frequencyMap.getOrDefault(user, 0) + 1);
-        }
-        return frequencyMap;
-    }
 
-    private List<UserType> getRequiredUserTypes() {
-        List<UserType> requiredUserType = new ArrayList<>();
-        requiredUserType.add(UserType.ADULT);
-        requiredUserType.add(UserType.KID);
-        requiredUserType.add(UserType.SENIOR_CITIZEN);
-        return requiredUserType;
-    }
 
-    private Comparator<UserType> getCustomComparator(Map<UserType, Integer> frequencyMap) {
-        Comparator<UserType> comparator = new Comparator<UserType>() {
-            public int compare(UserType ut1, UserType ut2) {
-                int freqComp = Integer.compare(frequencyMap.getOrDefault(ut2, 0),
-                        frequencyMap.getOrDefault(ut1, 0));
-                if (freqComp != 0) {
-                    return freqComp;
-                }
-                return String.valueOf(ut1).compareTo(String.valueOf(ut2));
-            }
-        };
-        return comparator;
-    }
-
-    private final String getSortedUserTypes(Station station) {
-
-        List<UserType> userTypes = station.getUserTypes();
-        Map<UserType, Integer> frequencyMap = getFrequencyMap(userTypes);
-
-        Comparator<UserType> comparator = getCustomComparator(frequencyMap);
-        List<UserType> requiredUserType = getRequiredUserTypes();
-        Collections.sort(requiredUserType, comparator);
-
-        String res = "";
-        for (UserType userType : requiredUserType) {
-            if (frequencyMap.containsKey(userType)) {
-                res += (userType + " " + frequencyMap.getOrDefault(userType, 0));
-                res += "\n";
-            }
-        }
-        return res;
-    }
-
-    private final String detailsOfStation(Station station) {
-        String res = "";
-        res += "TOTAL_COLLECTION " + station.getStationName() + " " + station.getTotal_collection()
-                + " " + station.getTotal_discount_given() + "\n";
-        res += "PASSENGER_TYPE_SUMMARY\n";
-        String sortedStationUsers = getSortedUserTypes(station);
-        res += sortedStationUsers;
-
-        return res;
+    private String detailsOfStation(Station station) {
+        return String.format("TOTAL_COLLECTION %s %d %d%n",
+            station.getStationName(),
+            station.getTotalCollection(),
+            station.getTotalDiscountGiven())
+            + "PASSENGER_TYPE_SUMMARY\n"
+            + userStatisticsService.getUserStatistics(station.getUserTypes());
     }
 
     @Override
-    public String getSummary() {
+        public String getSummary() {
 
-        if (stationRepository.count() == 0) {
-            throw new StationNotFoundException(
-                    "While printing there were no station to print Summary for");
+            if (stationRepository.count() == 0) {
+                throw new StationNotFoundException("While printing there were no stations to print Summary for");
+            }
+            
+            return Arrays.asList("CENTRAL", "AIRPORT")
+                    .stream()
+                    .filter(stationRepository::existsById)
+                    .map(this::getStationByName)
+                    .map(this::detailsOfStation)
+                    .collect(Collectors.joining("\n"));
         }
-        String res = "";
-        if (stationRepository.existsById("CENTRAL")) {
-            res += detailsOfStation(getStationByName("CENTRAL"));
-        }
-        if (stationRepository.existsById("AIRPORT")) {
-            res += detailsOfStation(getStationByName("AIRPORT"));
-        }
-
-        return res;
-    }
 
 }

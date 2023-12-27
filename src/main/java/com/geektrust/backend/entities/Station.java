@@ -33,7 +33,7 @@ public class Station {
         return stationName;
     }
 
-    public Integer getTotal_collection() {
+    public Integer getTotalCollection() {
         return total_collection;
     }
 
@@ -49,7 +49,7 @@ public class Station {
         this.userTypes.add(userType);
     }
 
-    public Integer getTotal_discount_given() {
+    public Integer getTotalDiscountGiven() {
         return total_discount_given;
     }
 
@@ -88,7 +88,7 @@ public class Station {
             return false;
         Station other = (Station) obj;
         if (this.getStationName() == null) {
-            if (other.getClass() != null)
+            if (other.getStationName() != null)
                 return false;
         } else if (!this.getStationName().equals(other.getStationName()))
             return false;

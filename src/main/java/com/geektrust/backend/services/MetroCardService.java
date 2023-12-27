@@ -17,27 +17,35 @@ public class MetroCardService implements IMetroCardService {
     public Integer payMoney(String metrocardId, Integer amount) {
         MetroCard metroCard = getMetroCard(metrocardId);
         boolean discountApplicable = evaluateDiscountEligibility(metroCard);
-        Integer toPay;
-        if (discountApplicable) {
-            amount = amount / 2;
-        }
 
+        amount = applyDiscount(amount, discountApplicable);
+        amount = handleTransactionCharges(metroCard, amount);
+
+        // If we are paying means we are making a journey
+        metroCard.incrementTotalJourney();
+        saveToMetroCardRepository(metroCard);
+        return amount;
+    }
+
+    private Integer applyDiscount(Integer amount, boolean discountApplicable) {
+        if (discountApplicable) {
+            amount /= 2;
+        }
+        return amount;
+    }
+
+    private Integer handleTransactionCharges(MetroCard metroCard, Integer amount) {
         Double trxnChrgPercentage = 0.02;
 
         if (metroCard.getBalance() < amount) {
             Double amountDiff = (double) (amount - metroCard.getBalance());
             Double trxnChrg = trxnChrgPercentage * amountDiff;
-            toPay = amount + (int) Math.ceil(trxnChrg);
+            amount += (int) Math.ceil(trxnChrg);
             metroCard.setBalance(0);
         } else {
-            toPay = amount;
             metroCard.setBalance(metroCard.getBalance() - amount);
         }
-        // If we are paying means we are making a journey
-        metroCard.incrementTotalJourney();
-        saveToMetroCardRepository(metroCard);
-
-        return toPay;
+        return amount;
     }
 
     @Override
