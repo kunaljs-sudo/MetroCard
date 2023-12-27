@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Station {
     private final String stationName;
-    private Integer total_collection = 0;
+    private Integer totalCollection = 0;
     private List<UserType> userTypes;
-    private Integer total_discount_given = 0;
+    private Integer totalDiscountGiven = 0;
 
     public Station(String stationName) {
         this.stationName = stationName;
@@ -15,18 +15,18 @@ public class Station {
     }
 
 
-    public Station(String stationName, Integer total_collection, List<UserType> userTypes,
-            Integer total_discount_given) {
+    public Station(String stationName, Integer totalCollection, List<UserType> userTypes,
+            Integer totalDiscountGiven) {
         this.stationName = stationName;
-        this.total_collection = total_collection;
+        this.totalCollection = totalCollection;
         this.userTypes = userTypes;
-        this.total_discount_given = total_discount_given;
+        this.totalDiscountGiven = totalDiscountGiven;
     }
 
 
     public Station(Station station) {
-        this(station.stationName, station.total_collection, station.userTypes,
-                station.total_discount_given);
+        this(station.stationName, station.totalCollection, station.userTypes,
+                station.totalDiscountGiven);
     }
 
     public String getStationName() {
@@ -34,11 +34,11 @@ public class Station {
     }
 
     public Integer getTotalCollection() {
-        return total_collection;
+        return totalCollection;
     }
 
     public void addToCollection(Integer collection) {
-        this.total_collection += collection;
+        this.totalCollection += collection;
     }
 
     public List<UserType> getUserTypes() {
@@ -50,23 +50,23 @@ public class Station {
     }
 
     public Integer getTotalDiscountGiven() {
-        return total_discount_given;
+        return totalDiscountGiven;
     }
 
-    public void setTotal_discount_given(Integer total_discount_given) {
-        this.total_discount_given = total_discount_given;
+    public void setTotalDiscountGiven(Integer totalDiscountGiven) {
+        this.totalDiscountGiven = totalDiscountGiven;
     }
 
-    public void addTotal_discount_given(Integer discount) {
-        this.total_discount_given += discount;
+    public void addTotal_discount_given(Integer discountAmount) {
+        this.totalDiscountGiven += discountAmount;
     }
 
 
 
     @Override
     public String toString() {
-        return "Station [stationName=" + stationName + ", total_collection=" + total_collection
-                + ", total_discount_given=" + total_discount_given + ", userTypes="
+        return "Station [stationName=" + stationName + ", total_collection=" + totalCollection
+                + ", total_discount_given=" + totalDiscountGiven + ", userTypes="
                 + userTypes.toString() + "]";
     }
 

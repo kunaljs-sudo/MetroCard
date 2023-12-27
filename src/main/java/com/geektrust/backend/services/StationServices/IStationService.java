@@ -1,4 +1,4 @@
-package com.geektrust.backend.services;
+package com.geektrust.backend.services.StationServices;
 
 import java.util.List;
 import com.geektrust.backend.entities.Station;
@@ -8,5 +8,4 @@ public interface IStationService {
 
     public void checkIn(List<String> args);
 
-    public String getSummary();
 }

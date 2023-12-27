@@ -11,10 +11,10 @@ import java.util.Optional;
 import com.geektrust.backend.entities.MetroCard;
 import com.geektrust.backend.entities.Station;
 import com.geektrust.backend.entities.UserType;
-import com.geektrust.backend.exceptions.StationNotFoundException;
 import com.geektrust.backend.exceptions.UserTypeNotFoundException;
 import com.geektrust.backend.repositories.IMetroCardRepository;
 import com.geektrust.backend.repositories.IStationRepository;
+import com.geektrust.backend.services.StationServices.StationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,18 +104,7 @@ public class StationServiceTest {
 
     }
 
-    @Test
-    @DisplayName("getSummaryTest Throws Error")
-    public void getSummaryTestThrowsError() {
-
-        when(stationRepository.count()).thenReturn((long) 0);
-
-        Assertions.assertThrows(StationNotFoundException.class, () -> stationService.getSummary());
-
-        verify(stationRepository, times(1)).count();
-
-
-    }
+    
 
 
 

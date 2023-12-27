@@ -1,32 +1,31 @@
-package com.geektrust.backend.services;
+package com.geektrust.backend.services.StationServices;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import com.geektrust.backend.entities.MetroCard;
 import com.geektrust.backend.entities.Station;
 import com.geektrust.backend.entities.UserType;
 import com.geektrust.backend.exceptions.NoMetroCardFoundException;
-import com.geektrust.backend.exceptions.StationNotFoundException;
 import com.geektrust.backend.exceptions.UserTypeNotFoundException;
 import com.geektrust.backend.repositories.IMetroCardRepository;
 import com.geektrust.backend.repositories.IStationRepository;
+import com.geektrust.backend.services.IMetroCardService;
 
 public class StationService implements IStationService {
 
     private IMetroCardRepository metroCardRepository;
     private IStationRepository stationRepository;
     private IMetroCardService metroCardService;
-    private IUserStatisticsService userStatisticsService;
+
+    private static final int METRO_CARD_NAME_INDEX = 0;
+    private static final int USER_TYPE_INDEX = 1;
+    private static final int STATION_NAME_INDEX = 2;
 
     public StationService(IMetroCardRepository metroCardRepository,
-            IStationRepository stationRepository, IMetroCardService metroCardService,
-            IUserStatisticsService userStatisticsService) {
+            IStationRepository stationRepository, IMetroCardService metroCardService) {
         this.metroCardRepository = metroCardRepository;
         this.stationRepository = stationRepository;
         this.metroCardService = metroCardService;
-        this.userStatisticsService = userStatisticsService;
     }
 
     @Override
@@ -38,27 +37,38 @@ public class StationService implements IStationService {
 
     @Override
     public void checkIn(List<String> args) {
+        // Extract information from the input arguments
+        String metroCardId = args.get(METRO_CARD_NAME_INDEX);
+        UserType userType = getUserType(args);
+        String stationName = args.get(STATION_NAME_INDEX);
 
-        String metroCardId = args.get(0);
-        UserType userType = UserType.valueOf(args.get(1));
-        String stationName = args.get(2);
-
+        // Retrieve MetroCard and Station objects
         MetroCard metroCard = getMetroCardByID(metroCardId);
         Station station = getStationByName(stationName);
 
-        Integer ticketamount = getTicketPrice(userType);
+        // Calculate ticket amount and check for discount eligibility
+        Integer ticketAmount = getTicketPrice(userType);
+        boolean discountApplicable = metroCardService.evaluateDiscountEligibility(metroCard);
+        Integer discountGivenOnTicket = discountApplicable ? ticketAmount / 2 : 0;
 
-
-        boolean discoundApplicable = metroCardService.evaluateDiscountEligibility(metroCard);
-        Integer discountGivenOnTicket = discoundApplicable ? ticketamount / 2 : 0;
-        Integer moneyCollectedOnTicket = metroCardService.payMoney(metroCard.getId(), ticketamount);
-
+        // Process payment and update station information
+        Integer moneyCollectedOnTicket = metroCardService.payMoney(metroCard.getId(), ticketAmount);
         station.addToCollection(moneyCollectedOnTicket);
         station.addTotal_discount_given(discountGivenOnTicket);
         station.addUserType(userType);
 
+        // Save updated station information to the repository
         saveToStationRepository(station);
+    }
 
+    // Helper method to convert string to UserType with error handling
+    private UserType getUserType(List<String> args) {
+        try {
+            return UserType.valueOf(args.get(USER_TYPE_INDEX));
+        } catch (IllegalArgumentException e) {
+            // Handle the case where the string cannot be converted to a valid UserType
+            throw new IllegalArgumentException("Invalid UserType: " + args.get(USER_TYPE_INDEX));
+        }
     }
 
     private Station saveToStationRepository(Station station) {
@@ -87,42 +97,18 @@ public class StationService implements IStationService {
     }
 
     private Integer getTicketPrice(UserType userType) {
-        if (userType == UserType.ADULT) {
-            return 200;
-        } else if (userType == UserType.SENIOR_CITIZEN) {
-            return 100;
-        } else if (userType == UserType.KID) {
-            return 50;
-        } else {
-            throw new UserTypeNotFoundException(
-                    "While checkIn userType provided is Invalid" + userType);
+        switch (userType) {
+            case ADULT:
+                return 200;
+            case SENIOR_CITIZEN:
+                return 100;
+            case KID:
+                return 50;
+            default:
+                throw new UserTypeNotFoundException("Invalid UserType during checkIn: " + userType);
         }
     }
 
 
-
-    private String detailsOfStation(Station station) {
-        return String.format("TOTAL_COLLECTION %s %d %d%n",
-            station.getStationName(),
-            station.getTotalCollection(),
-            station.getTotalDiscountGiven())
-            + "PASSENGER_TYPE_SUMMARY\n"
-            + userStatisticsService.getUserStatistics(station.getUserTypes());
-    }
-
-    @Override
-        public String getSummary() {
-
-            if (stationRepository.count() == 0) {
-                throw new StationNotFoundException("While printing there were no stations to print Summary for");
-            }
-            
-            return Arrays.asList("CENTRAL", "AIRPORT")
-                    .stream()
-                    .filter(stationRepository::existsById)
-                    .map(this::getStationByName)
-                    .map(this::detailsOfStation)
-                    .collect(Collectors.joining("\n"));
-        }
 
 }

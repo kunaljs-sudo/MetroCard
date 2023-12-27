@@ -9,11 +9,13 @@ import com.geektrust.backend.repositories.IStationRepository;
 import com.geektrust.backend.repositories.MetroCardRepository;
 import com.geektrust.backend.repositories.StationRepository;
 import com.geektrust.backend.services.IMetroCardService;
-import com.geektrust.backend.services.IStationService;
 import com.geektrust.backend.services.IUserStatisticsService;
 import com.geektrust.backend.services.MetroCardService;
-import com.geektrust.backend.services.StationService;
 import com.geektrust.backend.services.UserStatisticsService;
+import com.geektrust.backend.services.StationServices.GetStationSummaryService;
+import com.geektrust.backend.services.StationServices.IGetStationSummaryService;
+import com.geektrust.backend.services.StationServices.IStationService;
+import com.geektrust.backend.services.StationServices.StationService;
 
 public class ApplicationConfig {
 
@@ -22,12 +24,15 @@ public class ApplicationConfig {
 
     private final IMetroCardService metroCardService = new MetroCardService(metroCardRepository);
     private final IUserStatisticsService userStatisticsService = new UserStatisticsService();
-    private final IStationService stationService = new StationService(metroCardRepository,
-            stationRepository, metroCardService, userStatisticsService);
+    private final IStationService stationService =
+            new StationService(metroCardRepository, stationRepository, metroCardService);
+    private final IGetStationSummaryService getStationSummaryService =
+            new GetStationSummaryService(stationRepository, userStatisticsService, stationService);
 
     private final BalanceCommand balanceCommand = new BalanceCommand(metroCardService);
     private final CheckInCommand checkInCommand = new CheckInCommand(stationService);
-    private final PrintSummaryCommand printSummaryCommand = new PrintSummaryCommand(stationService);
+    private final PrintSummaryCommand printSummaryCommand =
+            new PrintSummaryCommand(getStationSummaryService);
 
     private final CommandInvoker commandInvoker = new CommandInvoker();
 

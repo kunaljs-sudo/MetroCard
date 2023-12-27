@@ -8,6 +8,7 @@ import com.geektrust.backend.repositories.IMetroCardRepository;
 public class MetroCardService implements IMetroCardService {
 
     private IMetroCardRepository metroCardRepository;
+    private Double trxnChrgPercentage = 0.02;
 
     public MetroCardService(IMetroCardRepository metroCardRepository) {
         this.metroCardRepository = metroCardRepository;
@@ -35,7 +36,6 @@ public class MetroCardService implements IMetroCardService {
     }
 
     private Integer handleTransactionCharges(MetroCard metroCard, Integer amount) {
-        Double trxnChrgPercentage = 0.02;
 
         if (metroCard.getBalance() < amount) {
             Double amountDiff = (double) (amount - metroCard.getBalance());
