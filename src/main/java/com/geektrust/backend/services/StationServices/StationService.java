@@ -46,7 +46,7 @@ public class StationService implements IStationService {
         // Calculate ticket amount and check for discount eligibility
         Integer ticketAmount = getTicketPrice(userType);
         boolean discountApplicable = metroCardService.evaluateDiscountEligibility(metroCard);
-        Integer discountGivenOnTicket = discountApplicable ? ticketAmount / 2 : 0;
+        Integer discountGivenOnTicket = discountApplicable ? ticketAmount / MagicNumbers.TWO : MagicNumbers.ZERO;
 
         // Process payment and update station information
         Integer moneyCollectedOnTicket = metroCardService.payMoney(metroCard.getId(), ticketAmount);

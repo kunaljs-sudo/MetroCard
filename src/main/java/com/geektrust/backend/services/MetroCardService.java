@@ -1,6 +1,7 @@
 package com.geektrust.backend.services;
 
 import java.util.Optional;
+import com.geektrust.backend.constants.MagicNumbers;
 import com.geektrust.backend.entities.MetroCard;
 import com.geektrust.backend.exceptions.NoMetroCardFoundException;
 import com.geektrust.backend.repositories.IMetroCardRepository;
@@ -8,7 +9,7 @@ import com.geektrust.backend.repositories.IMetroCardRepository;
 public class MetroCardService implements IMetroCardService {
 
     private final IMetroCardRepository metroCardRepository;
-    private Double trxnChrgPercentage = 0.02;
+    private Double trxnChrgPercentage = MagicNumbers.PERCENTAGE;
 
     public MetroCardService(IMetroCardRepository metroCardRepository) {
         this.metroCardRepository = metroCardRepository;
@@ -30,7 +31,7 @@ public class MetroCardService implements IMetroCardService {
 
     private Integer applyDiscount(Integer amount, boolean discountApplicable) {
         if (discountApplicable) {
-            amount /= 2;
+            amount /= MagicNumbers.TWO;
         }
         return amount;
     }
@@ -41,7 +42,7 @@ public class MetroCardService implements IMetroCardService {
             Double amountDiff = (double) (amount - metroCard.getBalance());
             Double trxnChrg = trxnChrgPercentage * amountDiff;
             amount += (int) Math.ceil(trxnChrg);
-            metroCard.setBalance(0);
+            metroCard.setBalance(MagicNumbers.ZERO);
         } else {
             metroCard.setBalance(metroCard.getBalance() - amount);
         }
@@ -59,7 +60,7 @@ public class MetroCardService implements IMetroCardService {
 
         Integer totalJourney = metroCard.getTotalJourney();
         // odd
-        if ((totalJourney.intValue() % 2) == 1) {
+        if ((totalJourney.intValue() % MagicNumbers.TWO) == MagicNumbers.ONE) {
             return true;
         }
         return false;

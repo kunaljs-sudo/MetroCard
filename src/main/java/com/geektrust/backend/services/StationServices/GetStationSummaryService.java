@@ -3,6 +3,7 @@ package com.geektrust.backend.services.StationServices;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.geektrust.backend.constants.MagicNumbers;
 import com.geektrust.backend.entities.Station;
 import com.geektrust.backend.exceptions.StationNotFoundException;
 import com.geektrust.backend.repositories.IStationRepository;
@@ -42,7 +43,7 @@ public class GetStationSummaryService implements IGetStationSummaryService {
     @Override
     public String getSummary() {
 
-        if (stationRepository.count() == 0) {
+        if (stationRepository.count() == MagicNumbers.ZERO) {
             throw new StationNotFoundException(
                     "While printing there were no stations to print Summary for");
         }
